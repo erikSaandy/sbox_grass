@@ -1,0 +1,149 @@
+{
+  "__guid": "029bf3d2-21d4-4acf-86bf-27273de9fc0c",
+  "GameObjects": [
+    {
+      "__guid": "b9407e73-aabe-4e69-9cf4-8acaa2fde507",
+      "Flags": 0,
+      "Name": "Main Camera",
+      "Position": "-300,0,100",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Sandbox.CameraComponent",
+          "__guid": "8d36fdae-da4e-4e29-9486-0e510c4beb52",
+          "BackgroundColor": "0.33333,0.46275,0.52157,1",
+          "ClearFlags": "All",
+          "FieldOfView": 60,
+          "IsMainCamera": true,
+          "Orthographic": false,
+          "OrthographicHeight": 1204,
+          "Priority": 1,
+          "RenderExcludeTags": "",
+          "RenderTags": "",
+          "TargetEye": "None",
+          "Viewport": "0,0,1,1",
+          "ZFar": 10000,
+          "ZNear": 10
+        }
+      ]
+    },
+    {
+      "__guid": "1c4f24fe-5a11-4865-b3f7-15a519983cd8",
+      "Flags": 0,
+      "Name": "Directional Light",
+      "Position": "0,0,200",
+      "Rotation": "-0.2459842,0.5938582,0.2931525,0.7077327",
+      "Tags": "light_directional,light",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Sandbox.DirectionalLight",
+          "__guid": "64575272-0612-4fd1-a6df-357b52d7aa7a",
+          "FogMode": "Enabled",
+          "FogStrength": 1,
+          "LightColor": "0.91373,0.98039,1,1",
+          "Shadows": true,
+          "SkyColor": "0,0,0,0"
+        }
+      ]
+    },
+    {
+      "__guid": "3a9a76bd-4a13-4ea1-847b-667cc268bd0e",
+      "Flags": 0,
+      "Name": "Plane",
+      "Scale": "21.71064,21.71064,21.71064",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Sandbox.ModelRenderer",
+          "__guid": "4bec0123-7bec-47a8-8798-bf5ef5eb418f",
+          "BodyGroups": 18446744073709551615,
+          "MaterialOverride": "dev/helper/reflectivity_90b.vmat",
+          "Model": "models/dev/plane.vmdl",
+          "RenderOptions": {
+            "GameLayer": true,
+            "OverlayLayer": false,
+            "BloomLayer": false,
+            "AfterUILayer": false
+          },
+          "RenderType": "On",
+          "Tint": "0.18809,0.35814,0.14992,1"
+        }
+      ]
+    },
+    {
+      "__guid": "ebfb0a2e-e735-43fd-88d9-62dac5d7bb9f",
+      "Flags": 0,
+      "Name": "grass",
+      "Position": "-138.0135,115.6966,133.9756",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "SceneGrassComponent",
+          "__guid": "4acc0583-9584-45d9-8a14-f23df33e7a58",
+          "TextureDisplay": {
+            "_type": "component",
+            "component_id": "3f01e7ec-c9d8-4f1b-be60-842e1c31ac12",
+            "go": "56e6d91e-7d32-4db1-aae5-f83f0f3106ee",
+            "component_type": "TextureDisplay"
+          }
+        }
+      ]
+    },
+    {
+      "__guid": "56e6d91e-7d32-4db1-aae5-f83f0f3106ee",
+      "Flags": 0,
+      "Name": "texture",
+      "Position": "-1184,128,128",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "TextureDisplay",
+          "__guid": "3f01e7ec-c9d8-4f1b-be60-842e1c31ac12"
+        },
+        {
+          "__type": "Sandbox.WorldPanel",
+          "__guid": "d851e6c3-87b2-4d08-b7b1-7396bec6999c",
+          "HorizontalAlign": "Center",
+          "InteractionRange": 1000,
+          "LookAtCamera": false,
+          "PanelSize": "4096,4096",
+          "RenderOptions": {
+            "GameLayer": true,
+            "OverlayLayer": false,
+            "BloomLayer": false,
+            "AfterUILayer": false
+          },
+          "RenderScale": 1,
+          "VerticalAlign": "Center"
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 30,
+    "NetworkInterpolation": true,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "grass",
+  "Description": "",
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 1
+}
