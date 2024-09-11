@@ -80,7 +80,7 @@
       "Components": [
         {
           "__type": "SceneGrassComponent",
-          "__guid": "4acc0583-9584-45d9-8a14-f23df33e7a58",
+          "__guid": "94705224-962c-4fe9-9f70-fd95dae2c12a",
           "TextureDisplay": {
             "_type": "component",
             "component_id": "3f01e7ec-c9d8-4f1b-be60-842e1c31ac12",

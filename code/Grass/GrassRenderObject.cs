@@ -24,10 +24,17 @@ public class GrassRenderObject : SceneCustomObject
 		public Material material;
 	}
 
+	public ComputeShader GenerateWindShader { get; private set; }
+	public Texture Wind { get; set; }
+	private int numWindThreadGroups;
+	public float windSpeed = 15.0f;
+	public float windFrequency = 15.0f;
+	public float windStrength = 15.0f;
+
 	public GrassChunk[] chunks;
-	Material grassMaterial= Material.Load( "grass/materials/glass_blade01.vmat" );
-	Model grassMesh = Model.Load( "grass/grass_strand01.vmdl" );
-	Model grassLODMesh = Model.Load( "grass/grass_strand01.vmdl" );
+	Material grassMaterial = Material.Load( "grass/materials/glass_blade01.vmat" );
+	Model grassMesh = Model.Load( "models/grass_strand01/grass_strand01.vmdl" );
+	Model grassLODMesh = Model.Load( "models/grass_strand01/grass_strand01_lod1.vmdl" );
 	Texture heightMap = Texture.Load( "grass/materials/heightmap_temp.vtex" );
 	BBox fieldBounds;
 
@@ -36,9 +43,9 @@ public class GrassRenderObject : SceneCustomObject
 
 	private ComputeShader initializeGrassShader;
 
-	[Property] public int fieldSize { get; set; } = 500;
-	[Property] public int chunkDensity { get; set; } = 1;
-	[Property] public int ChunkNum { get; set; } = 5;
+	[Property] public int fieldSize { get; set; } = 2000;
+	[Property] public float chunkDensity { get; set; } = 0.2f;
+	[Property] public int numChunks { get; set; } = 5;
 	[Property] public float displacementStrength { get; set; } = 200.0f;
 
 	[Range( 0, 1000.0f )]
@@ -52,9 +59,8 @@ public class GrassRenderObject : SceneCustomObject
 
 	public GrassRenderObject( SceneWorld sceneWorld ) : base( sceneWorld )
 	{
-
-		numInstancesPerChunk = MathX.CeilToInt( fieldSize / ChunkNum ) * chunkDensity;
-		chunkDimension = numInstancesPerChunk;
+		GenerateWindShader = new ComputeShader( "grass/shaders/windnoise.shader" );
+		numWindThreadGroups = MathX.CeilToInt( 1024f / 8.0f );
 
 		args = new() {
 			new DrawIndirectArguments() {
@@ -81,10 +87,12 @@ public class GrassRenderObject : SceneCustomObject
 		initializeGrassShader.Attributes.Set( "_Dimension", fieldSize );
 		initializeGrassShader.Attributes.Set( "_ChunkDimension", chunkDimension );
 		initializeGrassShader.Attributes.Set( "_Scale", chunkDensity );
-		initializeGrassShader.Attributes.Set( "_NumChunks", ChunkNum );
+		initializeGrassShader.Attributes.Set( "_NumChunks", numChunks );
 		initializeGrassShader.Attributes.Set( "_HeightMap", heightMap );
 		initializeGrassShader.Attributes.Set( "_DisplacementStrength", displacementStrength );
 
+		chunkDimension = MathX.CeilToInt( (fieldSize / numChunks) * (chunkDensity) );
+		numInstancesPerChunk = chunkDimension * chunkDimension;
 		InitializeChunks();
 
 		fieldBounds = new BBox( Vector3.Zero, new Vector3( -fieldSize, fieldSize, displacementStrength * 2 ) );
@@ -93,13 +101,13 @@ public class GrassRenderObject : SceneCustomObject
 
 	void InitializeChunks()
 	{
-		chunks = new GrassChunk[ChunkNum * ChunkNum];
+		chunks = new GrassChunk[numChunks * numChunks];
 
-		for ( int x = 0; x < ChunkNum; ++x )
+		for ( int x = 0; x < numChunks; ++x )
 		{
-			for ( int y = 0; y < ChunkNum; ++y )
+			for ( int y = 0; y < numChunks; ++y )
 			{
-				chunks[x + y * ChunkNum] = InitializeGrassChunk( x, y );
+				chunks[x + y * numChunks] = InitializeGrassChunk( x, y );
 			}
 		}
 	}
@@ -116,13 +124,13 @@ public class GrassRenderObject : SceneCustomObject
 
 		chunk.positionsBuffer = new ComputeBuffer<GrassData>( numInstancesPerChunk );
 		chunk.culledPositionsBuffer = new ComputeBuffer<GrassData>( numInstancesPerChunk );
-		int chunkDim = MathX.CeilToInt( fieldSize / ChunkNum );
+		int chunkDim = MathX.CeilToInt( fieldSize / numChunks );
 
 		Vector3 c = new Vector3( 0.0f, 0.0f, 0.0f );
 
 		c.y = 0.0f;
-		c.x = -(chunkDim * 0.5f * ChunkNum) + chunkDim * xOffset;
-		c.z = -(chunkDim * 0.5f * ChunkNum) + chunkDim * yOffset;
+		c.x = -(chunkDim * 0.5f * numChunks) + chunkDim * xOffset;
+		c.z = -(chunkDim * 0.5f * numChunks) + chunkDim * yOffset;
 		c.x += chunkDim * 0.5f;
 		c.z += chunkDim * 0.5f;
 
@@ -131,7 +139,12 @@ public class GrassRenderObject : SceneCustomObject
 		initializeGrassShader.Attributes.Set( "_XOffset", xOffset );
 		initializeGrassShader.Attributes.Set( "_YOffset", yOffset );
 		initializeGrassShader.Attributes.Set( "_GrassDataBuffer", chunk.positionsBuffer );
-		initializeGrassShader.Dispatch( MathX.CeilToInt( fieldSize / ChunkNum ) * chunkDensity, MathX.CeilToInt( fieldSize / ChunkNum ) * chunkDensity, 1 );
+		initializeGrassShader.Dispatch( MathX.CeilToInt( fieldSize / numChunks * chunkDensity ), MathX.CeilToInt( fieldSize / numChunks * chunkDensity ), 1 );
+
+		//var data = new DrawIndirectArguments[1];
+		//chunk.argsBuffer.GetData( data );
+		//var data = new GrassData[numInstancesPerChunk];
+		//chunk.positionsBuffer.GetData( data );
 
 		chunk.material = grassMaterial.CreateCopy();
 		//chunk.material.Attributes.Set( "positionBuffer", chunk.culledPositionsBuffer );
@@ -142,8 +155,14 @@ public class GrassRenderObject : SceneCustomObject
 		return chunk;
 	}
 
-
-	RenderAttributes attributes = new RenderAttributes();
+	void GenerateWind()
+	{
+		GenerateWindShader.Attributes.Set( "_WindMap", Wind );
+		GenerateWindShader.Attributes.Set( "_Time", Time.Now * windSpeed );
+		GenerateWindShader.Attributes.Set( "_Frequency", windFrequency );
+		GenerateWindShader.Attributes.Set( "_Amplitude", windStrength );
+		GenerateWindShader.Dispatch( numWindThreadGroups, numWindThreadGroups, 1 );
+	}
 
 	public override void RenderSceneObject()
 	{
@@ -153,10 +172,10 @@ public class GrassRenderObject : SceneCustomObject
 		//Matrix4x4 V = Scene.Camera.Transform.WorldToLocalMatrix();
 		//Matrix4x4 VP = P * V;
 
-		//GenerateWind();
+		GenerateWind();
 
 
-		for ( int i = 0; i < ChunkNum * ChunkNum; ++i )
+		for ( int i = 0; i < numChunks * numChunks; ++i )
 		{
 			GrassChunk chunk = chunks[i];
 
@@ -167,18 +186,15 @@ public class GrassRenderObject : SceneCustomObject
 
 			//CullGrass( chunk, VP, noLOD );
 
-			attributes.Set( "_ArgsBuffer", noLOD ? chunk.argsBuffer : chunk.argsBufferLOD );
-
-
 			if ( noLOD )
 			{
-				chunk.argsBuffer.SetData( args );
-				Graphics.DrawModelInstancedIndirect( grassMesh, chunk.argsBuffer );
+				//chunk.argsBuffer.SetData( args );
+				Graphics.DrawModelInstancedIndirect( grassMesh, chunk.argsBuffer, attributes: initializeGrassShader.Attributes );
 			}
 			else
 			{
-				chunk.argsBufferLOD.SetData( argsLOD );
-				Graphics.DrawModelInstancedIndirect( grassLODMesh, chunk.argsBufferLOD );
+				//chunk.argsBufferLOD.SetData( argsLOD );
+				Graphics.DrawModelInstancedIndirect( grassLODMesh, chunk.argsBufferLOD, attributes: initializeGrassShader.Attributes );
 			}
 		}
 
@@ -199,7 +215,7 @@ public class GrassRenderObject : SceneCustomObject
 		//scanBuffer = null;
 		//groupSumArrayBuffer = null;
 
-		for ( int i = 0; i < ChunkNum * ChunkNum; ++i )
+		for ( int i = 0; i < numChunks * numChunks; ++i )
 		{
 			FreeChunk( chunks[i] );
 		}

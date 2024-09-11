@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public class SceneGrassComponent : Component
 {
-	GrassRenderDirectObject Renderer { get; set; }
+	GrassRenderObject Renderer { get; set; }
 
 	[Property] public TextureDisplay TextureDisplay { get; set; }
 
@@ -14,12 +14,12 @@ public class SceneGrassComponent : Component
 	{
 		base.OnAwake();
 
-		Renderer = new GrassRenderDirectObject( Scene.SceneWorld );
+		Renderer = new GrassRenderObject( Scene.SceneWorld );
 
 		Renderer.Wind = Texture.CreateRenderTarget()
 		.WithSize( 1024, 1024 )
 		.WithDepth( 0 )
-		.WithFormat( ImageFormat.ARGB8888 )
+		.WithFormat( ImageFormat.RGBA8888 )
 		.WithDynamicUsage()
 		.WithUAVBinding()
 		.Create( "texture_grass_wind" );
